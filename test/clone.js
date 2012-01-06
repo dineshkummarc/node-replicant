@@ -3,7 +3,7 @@ var replicant = require('../');
 
 test('one-way cloning', function (t) {
     var update = replicant({ a : 0 });
-    t.plan(10);
+    t.plan(11);
     
     var times = 0;
     var iv = setInterval(function () {
@@ -11,7 +11,12 @@ test('one-way cloning', function (t) {
         update(function (obj) { obj.a ++ });
         
         if (times === 10) {
+            update.unpipe(clone);
+        }
+        
+        if (times === 12) {
             clearInterval(iv);
+            t.equal(clone.object.a, 10);
             t.end();
         }
     }, 10);
