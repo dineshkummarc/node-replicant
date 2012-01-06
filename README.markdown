@@ -115,7 +115,10 @@ update.pipe(target)
 -------------------
 
 Pipe JSON data through the stream `target`, which can be another replicant
-object or a regular stream.
+object, a regular stream, or a replicant object's `.pipe` function.
+
+Using the object's `.pipe` function here is handy for replicating over
+[dnode](https://github.com/substack/dnode) connections.
 
 attributes
 ==========
