@@ -1,6 +1,5 @@
 var replicant = require('../');
 var dnode = require('dnode');
-var patcher = require('patcher');
 
 var server = dnode(function (remote, conn) {
     var rep = replicant({ a : 0, c : 'beep' });
@@ -26,5 +25,5 @@ server.on('ready', function () {
     dnode.connect(5051, function (remote, conn) {
         rep.pipe(remote.patch);
         remote.pipe(rep.patch.bind(rep));
-    }).connect(5051);
+    });
 });
