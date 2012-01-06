@@ -25,8 +25,14 @@ var replicant = module.exports = function (obj) {
     
     self.object = patcher.clone(obj);
     
+    var pipeTargets = [];
+    var pipeListeners = [];
+    
     self.pipe = function (target) {
         if (typeof target === 'function' && !target.on) {
+            pipeTargets.push(target);
+            pipeListeners.push(target);
+            
             self.on('patch', target);
             target(patcher.computePatch({}, self.object));
             return;
@@ -35,13 +41,26 @@ var replicant = module.exports = function (obj) {
         var stringify = JSONStream.stringify();
         stringify.pipe(target);
         
-        self.on('patch', function (patch) {
+        function onpatch (patch) {
             stringify.write(patch);
-        });
+        }
+        self.on('patch', onpatch);
+        
+        pipeTargets.push(target);
+        pipeListeners.push(onpatch);
         
         stringify.write(patcher.computePatch({}, self.object));
         
         return self;
+    };
+    
+    self.unpipe = function (target) {
+        var ix = pipeTargets.indexOf(target);
+        if (ix >= 0) {
+            self.removeListener('patch', pipeListeners[ix]);
+            pipeTargets.splice(ix, 1);
+            pipeListeners.splice(ix, 1);
+        }
     };
     
     self.writable = true;
