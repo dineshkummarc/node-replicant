@@ -100,6 +100,8 @@ Pipe replicant objects or streams to each other.
 var update = replicant(obj)
 ---------------------------
 
+Create a new replicant object wrapping an object `obj`.
+
 update(cb)
 ----------
 
@@ -119,6 +121,14 @@ object, a regular stream, or a replicant object's `.pipe` function.
 
 Using the object's `.pipe` function here is handy for replicating over
 [dnode](https://github.com/substack/dnode) connections.
+
+update.unpipe(target)
+---------------------
+
+Don't pipe any more data to `target`.
+
+This is useful for when multiple clients are connected to the same replication
+server and the connection gets severed.
 
 attributes
 ==========
