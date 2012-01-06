@@ -32,6 +32,9 @@ var replicant = module.exports = function (obj) {
         self.on('patch', function (patch) {
             stringify.write(patch);
         });
+        
+        stringify.write(patcher.computePatch({}, self.object));
+        
         return self;
     };
     
