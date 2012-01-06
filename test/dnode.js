@@ -11,7 +11,12 @@ test('replicate through a dnode server', function (t) {
     var server = dnode(function (remote, conn) {
         serverRep = replicant({ a : 0, c : 'beep' });
         this.patch = serverRep.patch.bind(serverRep);
-        this.pipe = serverRep.pipe.bind(serverRep);
+        this.pipe = function (target) {
+            conn.on('end', function () {
+                serverRep.unpipe(target);
+            });
+            serverRep.pipe(target);
+        };
         
         var iv = setInterval(function () {
             serverRep(function (obj) { obj.a ++ });
@@ -27,6 +32,7 @@ test('replicate through a dnode server', function (t) {
         
         var client = dnode.connect(port, function (remote, conn) {
             clientRep.pipe(remote.patch);
+            
             remote.pipe(clientRep.patch.bind(clientRep));
             
             var iv = setInterval(function () {
@@ -37,6 +43,8 @@ test('replicate through a dnode server', function (t) {
                 conn.end();
                 clearInterval(iv);
                 server.close();
+                
+                clientRep.unpipe(remote.patch);
                 
                 t.ok(clientRep.object.a >= 10);
                 t.ok(serverRep.object.a >= 10);
