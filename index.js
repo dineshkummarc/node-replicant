@@ -26,6 +26,12 @@ var replicant = module.exports = function (obj) {
     self.object = patcher.clone(obj);
     
     self.pipe = function (target) {
+        if (typeof target === 'function' && !target.on) {
+            self.on('patch', target);
+            target(patcher.computePatch({}, self.object));
+            return;
+        }
+        
         var stringify = JSONStream.stringify();
         stringify.pipe(target);
         

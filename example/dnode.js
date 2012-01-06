@@ -4,13 +4,8 @@ var patcher = require('patcher');
 
 var server = dnode(function (remote, conn) {
     var rep = replicant({ a : 0, c : 'beep' });
-    
-    this.join = function (cb) {
-        rep.on('patch', cb);
-        cb(patcher.computePatch({}, rep.object));
-    };
-    
     this.patch = rep.patch.bind(rep);
+    this.pipe = rep.pipe.bind(rep);
     
     setInterval(function () {
         rep(function (obj) { obj.a ++ });
@@ -18,19 +13,18 @@ var server = dnode(function (remote, conn) {
 }).listen(5051);
 
 server.on('ready', function () {
-    dnode.connect(5051, function (remote) {
-        var rep = replicant({ b : 100 });
-        remote.join(rep.patch.bind(rep));
-        
-        rep.on('patch', remote.patch);
-        remote.patch(patcher.computePatch({}, rep.object));
-        
-        setInterval(function () {
-            rep(function (obj) { obj.b ++ });
-        }, 300);
-        
-        setInterval(function () {
-            console.dir(rep.object);
-        }, 1000);
-    });
+    var rep = replicant({ b : 100 });
+    
+    setInterval(function () {
+        rep(function (obj) { obj.b ++ });
+    }, 300);
+    
+    setInterval(function () {
+        console.dir(rep.object);
+    }, 1000);
+    
+    dnode.connect(5051, function (remote, conn) {
+        rep.pipe(remote.patch);
+        remote.pipe(rep.patch.bind(rep));
+    }).connect(5051);
 });
