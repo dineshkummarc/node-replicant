@@ -25,7 +25,7 @@
         "patcher" : "0.0.x"
     },
     "devDependencies" : {
-        "tap" : "https://github.com/substack/node-tap/tarball/master"
+        "tap" : "0.1.x"
     },
     "engines" : {
         "node" : ">=0.4.0"
