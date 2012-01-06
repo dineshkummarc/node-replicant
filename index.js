@@ -2,7 +2,7 @@ var patcher = require('patcher');
 var JSONStream = require('JSONStream');
 var EventEmitter = require('events').EventEmitter;
 
-module.exports = function (obj) {
+var replicant = module.exports = function (obj) {
     if (obj === undefined) obj = {};
     
     var self = function (cb) {
@@ -57,4 +57,9 @@ module.exports = function (obj) {
     });
     
     return self;
+};
+
+replicant.join = function (a, b) {
+    a.pipe(b);
+    b.pipe(a);
 };
