@@ -4,7 +4,7 @@ var replicant = require('../');
 test('join two replicants', function (t) {
     t.plan(10);
     
-    var a = replicant({ a : 0 });
+    var a = replicant({ a : 0, c : 55 });
     var b = replicant({ b : 100 });
     replicant.join(a, b);
     
@@ -17,6 +17,7 @@ test('join two replicants', function (t) {
         t.deepEqual(a.object, {
             a : times,
             b : times + 100,
+            c : 55,
         });
         t.deepEqual(a.object, b.object);
         
