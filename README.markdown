@@ -9,6 +9,8 @@ examples
 join.js
 -------
 
+Synchronize two objects with `replicant.join()`
+
 ``` js
 var replicant = require('replicant');
 
@@ -39,6 +41,52 @@ $ node example/join.js
 ^C
 ```
 
+join_stream.js
+--------------
+
+Synchronize two objects over a network stream
+
+``` js
+var replicant = require('replicant');
+var net = require('net');
+
+net.createServer(function (stream) {
+    var rep = replicant({ a : 0 });
+    replicant.join(rep, stream);
+    
+    setInterval(function () {
+        rep(function (obj) { obj.a ++ });
+    }, 500);
+    
+    setInterval(function () {
+        console.dir(rep.object);
+    }, 1000);
+}).listen(5051, ready);
+
+function ready () {
+    var stream = net.createConnection(5051, function () {
+        var rep = replicant({ b : 100 });
+        replicant.join(rep, stream);
+        
+        setInterval(function () {
+            rep(function (obj) { obj.b ++ });
+        }, 300);
+    });
+}
+```
+
+output:
+
+```
+$ node example/join_stream.js 
+{ a: 2, b: 103 }
+{ a: 4, b: 106 }
+{ a: 6, b: 110 }
+{ a: 8, b: 113 }
+{ a: 10, b: 116 }
+^C
+```
+
 methods
 =======
 
@@ -47,7 +95,7 @@ var replicant = require('replicant')
 replicant.join(a, b)
 --------------------
 
-Pipe two replicant objects to each other.
+Pipe replicant objects or streams to each other.
 
 var update = replicant(obj)
 ---------------------------
