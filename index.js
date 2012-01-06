@@ -3,27 +3,27 @@ var JSONStream = require('JSONStream');
 var EventEmitter = require('events').EventEmitter;
 
 module.exports = function (obj) {
-    var prev = patcher.clone(obj);
+    if (obj === undefined) obj = {};
     
     var self = function (cb) {
         if (cb.length === 2) {
-            var ref = patcher.clone(prev);
+            var ref = patcher.clone(self.object);
             cb(ref, update);
         }
         else {
-            var ref = patcher.clone(prev);
+            var ref = patcher.clone(self.object);
             cb(ref);
             update(ref);
         }
         
         function update (next) {
-            var patch = patcher.computePatch(prev, next);
-            prev = next;
+            var patch = patcher.computePatch(self.object, next);
+            self.object = next;
             self.emit('patch', patch);
         }
     };
     
-    var parse = JSONStream.parse([ /./ ]);
+    self.object = patcher.clone(obj);
     
     self.pipe = function (target) {
         var stringify = JSONStream.stringify();
@@ -35,11 +35,25 @@ module.exports = function (obj) {
         return self;
     };
     
-    var emitter = new EventEmitter;
+    self.writable = true;
+    self.readable = true;
+    
+    self.patch = function (patch) {
+        patcher.applyPatch(self.object, patch);
+        self.emit('update', self.object);
+    };
+    
     Object.keys(EventEmitter.prototype).forEach(function (key) {
-        if (typeof emitter[key] === 'function') {
-            self[key] = emitter[key].bind(emitter);
+        if (typeof EventEmitter.prototype[key] === 'function') {
+            self[key] = EventEmitter.prototype[key];
         }
+    });
+    
+    var parse = JSONStream.parse([ /./ ]);
+    self.write = parse.write.bind(parse);
+    
+    parse.on('data', function (patch) {
+        self.patch(patch);
     });
     
     return self;
