@@ -44,6 +44,11 @@ methods
 
 var replicant = require('replicant')
 
+replicant.join(a, b)
+--------------------
+
+Pipe two replicant objects to each other.
+
 var update = replicant(obj)
 ---------------------------
 
