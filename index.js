@@ -1,5 +1,11 @@
 var patcher = require('patcher');
-var JSONStream = require('stream').Stream ? (require)('JSONStream') : null;
+var JSONStream = null;
+try {
+    JSONStream = (require)('stream').Stream
+        ? (require)('JSONStream') : null
+    ;
+} catch (e) {}
+
 var EventEmitter = require('events').EventEmitter;
 
 var replicant = module.exports = function (obj) {
@@ -37,11 +43,20 @@ var replicant = module.exports = function (obj) {
             target(patcher.computePatch({}, self.object));
             return self;
         }
+        else if (target.patch) {
+            self.on('patch', target.patch);
+            
+            pipeTargets.push(target);
+            pipeListeners.push(target.patch);
+            
+            target.patch(patcher.computePatch({}, self.object));
+            return self;
+        }
         else if (JSONStream) {
             var stringify = JSONStream.stringify();
             stringify.pipe(target);
             
-            function onpatch (patch) {
+            var onpatch = function (patch) {
                 stringify.write(patch);
             }
             self.on('patch', onpatch);
