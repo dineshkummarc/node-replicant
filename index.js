@@ -1,5 +1,5 @@
 var patcher = require('patcher');
-var JSONStream = require('JSONStream');
+var JSONStream = require('stream').Stream ? (require)('JSONStream') : null;
 var EventEmitter = require('events').EventEmitter;
 
 var replicant = module.exports = function (obj) {
@@ -35,23 +35,24 @@ var replicant = module.exports = function (obj) {
             
             self.on('patch', target);
             target(patcher.computePatch({}, self.object));
-            return;
+            return self;
         }
-        
-        var stringify = JSONStream.stringify();
-        stringify.pipe(target);
-        
-        function onpatch (patch) {
-            stringify.write(patch);
+        else if (JSONStream) {
+            var stringify = JSONStream.stringify();
+            stringify.pipe(target);
+            
+            function onpatch (patch) {
+                stringify.write(patch);
+            }
+            self.on('patch', onpatch);
+            
+            pipeTargets.push(target);
+            pipeListeners.push(onpatch);
+            
+            stringify.write(patcher.computePatch({}, self.object));
+            
+            return self;
         }
-        self.on('patch', onpatch);
-        
-        pipeTargets.push(target);
-        pipeListeners.push(onpatch);
-        
-        stringify.write(patcher.computePatch({}, self.object));
-        
-        return self;
     };
     
     self.unpipe = function (target) {
@@ -77,12 +78,14 @@ var replicant = module.exports = function (obj) {
         }
     });
     
-    var parse = JSONStream.parse([ /./ ]);
-    self.write = parse.write.bind(parse);
-    
-    parse.on('data', function (patch) {
-        self.patch(patch);
-    });
+    if (JSONStream) {
+        var parse = JSONStream.parse([ /./ ]);
+        self.write = parse.write.bind(parse);
+        
+        parse.on('data', function (patch) {
+            self.patch(patch);
+        });
+    }
     
     return self;
 };
