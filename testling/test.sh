@@ -13,5 +13,5 @@ for file in join.js clone.js; do
     tar -cf- "testling/$file" index.js \
         node_modules/patcher/index.js \
         | curl -sSNT- -u "$user:$pass" \
-            "http://localhost:8080/?main=testling/$file"
+            "http://testling.com/?main=testling/$file"
 done

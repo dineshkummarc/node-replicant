@@ -156,6 +156,30 @@ With [npm](http://npmjs.org) do:
 npm install replicant
 ```
 
+in the browser
+==============
+
+This module works great in the browser with
+[browserify](http://github.com/substack/node-browserify).
+
+tests
+=====
+
+To run the server-side tests in `test/`, do:
+
+```
+npm test
+```
+
+To run the [testling](http://testling.com) browser tests in `testling/`, create
+a testling account then from the project root directory run:
+
+```
+testling/test.sh
+```
+
+The shell script will prompt you to enter your testling account info.
+
 license
 =======
 
