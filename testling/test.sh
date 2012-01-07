@@ -1,9 +1,17 @@
 #!/bin/bash
 
-echo -n 'testling user: '
-read user
+read -p 'testling email: ' user
+stty -echo
+read -p 'testling password: ' pass
+stty echo
 
-tar -cf- testling/join.js index.js \
-    node_modules/patcher/index.js \
-    | curl -sSNT- -u $user \
-        'http://testling.com/?main=testling/join.js'
+echo
+
+for file in join.js clone.js; do
+    echo; echo "*** running $file"
+    
+    tar -cf- "testling/$file" index.js \
+        node_modules/patcher/index.js \
+        | curl -sSNT- -u "$user:$pass" \
+            "http://localhost:8080/?main=testling/$file"
+done
