@@ -72,11 +72,11 @@ var replicant = module.exports = function (obj) {
         self.emit('update', self.object);
     };
     
-    Object.keys(EventEmitter.prototype).forEach(function (key) {
+    for (var key in EventEmitter.prototype) {
         if (typeof EventEmitter.prototype[key] === 'function') {
             self[key] = EventEmitter.prototype[key];
         }
-    });
+    }
     
     if (JSONStream) {
         var parse = JSONStream.parse([ /./ ]);
