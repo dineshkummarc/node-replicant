@@ -2,15 +2,11 @@ var test = require('tap').test;
 var replicant = require('../');
 
 test('null patch', function (t) {
-    t.plan(1);
-    var rep = replicant({});
+    var src = replicant({});
+    var dst = replicant({});
     
-    var clone = replicant();
-    clone.on('update', function (obj) {
-        t.deepEqual(obj, {});
-        t.end();
-    });
-    rep.pipe(clone);
+    src.pipe(dst);
+    src.patch({});
     
-    rep.patch({});
+    t.end();
 });

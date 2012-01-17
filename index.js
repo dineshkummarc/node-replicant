@@ -83,8 +83,10 @@ var replicant = module.exports = function (obj) {
     self.readable = true;
     
     self.patch = function (patch) {
-        patcher.applyPatch(self.object, patch);
-        self.emit('update', self.object);
+        if (patch !== null) {
+            patcher.applyPatch(self.object, patch);
+            self.emit('update', self.object);
+        }
     };
     
     for (var key in EventEmitter.prototype) {
